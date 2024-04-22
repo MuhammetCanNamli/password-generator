@@ -1,47 +1,81 @@
 package main
 
 import (
+	"bufio"
 	"crypto/rand"
 	"fmt"
 	"math/big"
+	"os"
+	"strconv"
+	"strings"
 )
 
 func main() {
+	reader := bufio.NewReader(os.Stdin)
+	length := 0
+
+	for {
+		fmt.Print("Enter the length of the password you want to generate: ")
+		lengthStr, _ := reader.ReadString('\n')
+		newLength, err := parseInt(lengthStr)
+		if err != nil {
+			fmt.Println("Error: ", err)
+			continue
+		}
+
+		if newLength < 12 {
+			fmt.Println("Error: Password length must be at least 12.")
+			continue
+		}
+
+		length = newLength
+		break
+	}
+
 	// Generate passwords with different lengths
-	password1, err := generatePassword(12)
+	password, err := generatePassword(length)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	password2, err := generatePassword(16)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
+	fmt.Println("Generated Password 1:", password)
 
-	fmt.Println("Generated Password 1:", password1)
-	fmt.Println("Generated Password 2:", password2)
 }
 
 func generatePassword(length int) (string, error) {
-	if length <= 0 {
-		return "", fmt.Errorf("password length must be greater than 0")
-	}
-
 	// Defining password characters
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+"
+	const (
+		lowercaseChars = "abcdefghijklmnopqrstuvwxyz"
+		uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+		digitChars     = "0123456789"
+		specialChars   = "!@#$%^&*()-_=+/"
+	)
 
-	// Select random characters by looping through password length
-	password := make([]byte, length)
+	// Combine all character sets
+	allChars := lowercaseChars + uppercaseChars + digitChars + specialChars
 
-	for i := range password {
+	// Initialize password string
+	var password strings.Builder
+
+	// Generate password characters randomly
+	for i := 0; i < length; i++ {
 		// Generate a random index within the charset length using crypto/rand
-		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		randomIndex, err := rand.Int(rand.Reader, big.NewInt(int64(len(allChars))))
 		if err != nil {
 			return "", err
 		}
-		password[i] = charset[randomIndex.Int64()]
+		randomChar := allChars[randomIndex.Int64()]
+		password.WriteByte(randomChar)
 	}
-	return string(password), nil
+	return password.String(), nil
+}
+
+func parseInt(s string) (int, error) {
+	s = strings.TrimSpace(s)
+	num, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, fmt.Errorf("An invalid number entry: %s", s)
+	}
+	return num, nil
 }
