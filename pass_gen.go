@@ -12,35 +12,53 @@ import (
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
-	length := 0
 
 	for {
-		fmt.Print("Enter the length of the password you want to generate: ")
+		length := getValidLength(reader)
+		password, err := generatePassword(length)
+		if err != nil {
+			fmt.Println("Error: ", err)
+			return
+		}
+
+		fmt.Println("Generated Password 1:", password)
+
+		for {
+			fmt.Print("Do you want to create another password? (Y / N): ")
+			answer, _ := reader.ReadString('\n')
+			answer = strings.TrimSpace(strings.ToUpper(answer))
+
+			if answer == "Y" || answer == "y" {
+				fmt.Println("Let's create a new password")
+				break
+			} else if answer == "N" || answer == "n" {
+				fmt.Println("Have a nice day :)")
+				return
+			} else {
+				fmt.Println("You have entered incorrect data.")
+			}
+		}
+
+	}
+}
+
+func getValidLength(reader *bufio.Reader) int {
+	for {
+		fmt.Print("Enter the length of the password you want to generate (at least 12): ")
 		lengthStr, _ := reader.ReadString('\n')
-		newLength, err := parseInt(lengthStr)
+		length, err := parseInt(lengthStr)
 		if err != nil {
 			fmt.Println("Error: ", err)
 			continue
 		}
 
-		if newLength < 12 {
+		if length < 12 {
 			fmt.Println("Error: Password length must be at least 12.")
 			continue
 		}
 
-		length = newLength
-		break
+		return length
 	}
-
-	// Generate passwords with different lengths
-	password, err := generatePassword(length)
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	fmt.Println("Generated Password 1:", password)
-
 }
 
 func generatePassword(length int) (string, error) {
