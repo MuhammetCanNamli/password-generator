@@ -107,13 +107,11 @@ func parseInt(s string) (int, error) {
 
 func checkPasswordStrength(password string) (string, rune, int) {
 	var (
-		hasLower          bool
-		hasUpper          bool
-		hasDigit          bool
-		hasSpecial        bool
-		hasRepeated       bool
-		repeatedChar      rune
-		repeatedCharCount int
+		hasLower      bool
+		hasUpper      bool
+		hasDigit      bool
+		hasSpecial    bool
+		repeatedChars map[rune]int
 	)
 
 	for _, char := range password {
@@ -129,25 +127,30 @@ func checkPasswordStrength(password string) (string, rune, int) {
 		}
 	}
 
-	// Check for repeated characters
+	repeatedChars = make(map[rune]int)
 	for _, char := range password {
-		count := strings.Count(password, string(char))
-		if count > 1 {
-			hasRepeated = true
-			repeatedChar = char
-			repeatedCharCount = count
-			break
+		repeatedChars[char]++
+	}
+
+	var (
+		maxRepeatedChar  rune
+		maxRepeatedCount int
+	)
+	for char, count := range repeatedChars {
+		if count > maxRepeatedCount {
+			maxRepeatedChar = char
+			maxRepeatedCount = count
 		}
 	}
 
 	strength := "Weak"
-	if len(password) >= 12 && hasLower && hasUpper && hasDigit && hasSpecial && !hasRepeated {
+	if len(password) >= 12 && hasLower && hasUpper && hasDigit && hasSpecial && maxRepeatedCount <= 3 {
 		strength = "Very Strong"
-	} else if len(password) >= 10 && hasLower && hasUpper && hasDigit && hasSpecial && !hasRepeated {
+	} else if len(password) >= 10 && hasLower && hasUpper && hasDigit && hasSpecial && maxRepeatedCount <= 5 {
 		strength = "Strong"
-	} else if len(password) >= 8 && (hasLower || hasUpper) && hasDigit && !hasRepeated {
+	} else if len(password) >= 8 && (hasLower || hasUpper) && hasDigit && maxRepeatedCount <= 7 {
 		strength = "Moderate"
 	}
 
-	return strength, repeatedChar, repeatedCharCount
+	return strength, maxRepeatedChar, maxRepeatedCount
 }
