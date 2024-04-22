@@ -74,7 +74,7 @@ func generatePassword(length int) (string, error) {
 		lowercaseChars = "abcdefghijklmnopqrstuvwxyz"
 		uppercaseChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 		digitChars     = "0123456789"
-		specialChars   = "!@#$%^&*()-_=+/"
+		specialChars   = ".,;{}[]!@#€ß<>|$%^&*()-_=+/"
 	)
 
 	// Combine all character sets
