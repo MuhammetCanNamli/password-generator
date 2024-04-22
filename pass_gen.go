@@ -23,8 +23,12 @@ func main() {
 
 		fmt.Println("Generated Password: ", password)
 
-		strength := checkPasswordStrength(password)
-		fmt.Println("Password Strength: ", strength)
+		strength, repeatedChar, repeatedCharCount := checkPasswordStrength(password)
+		fmt.Println("Password Strength:", strength)
+
+		if repeatedChar != 0 {
+			fmt.Printf("Repeated Character: %c, Count: %d\n", repeatedChar, repeatedCharCount)
+		}
 
 		for {
 			fmt.Print("Do you want to create another password? (Y / N): ")
@@ -101,12 +105,15 @@ func parseInt(s string) (int, error) {
 	return num, nil
 }
 
-func checkPasswordStrength(password string) string {
+func checkPasswordStrength(password string) (string, rune, int) {
 	var (
-		hasLower   bool
-		hasUpper   bool
-		hasDigit   bool
-		hasSpecial bool
+		hasLower          bool
+		hasUpper          bool
+		hasDigit          bool
+		hasSpecial        bool
+		hasRepeated       bool
+		repeatedChar      rune
+		repeatedCharCount int
 	)
 
 	for _, char := range password {
@@ -122,12 +129,25 @@ func checkPasswordStrength(password string) string {
 		}
 	}
 
+	// Check for repeated characters
+	for _, char := range password {
+		count := strings.Count(password, string(char))
+		if count > 1 {
+			hasRepeated = true
+			repeatedChar = char
+			repeatedCharCount = count
+			break
+		}
+	}
+
 	strength := "Weak"
-	if len(password) >= 12 && hasLower && hasUpper && hasDigit && hasSpecial {
+	if len(password) >= 12 && hasLower && hasUpper && hasDigit && hasSpecial && !hasRepeated {
+		strength = "Very Strong"
+	} else if len(password) >= 10 && hasLower && hasUpper && hasDigit && hasSpecial && !hasRepeated {
 		strength = "Strong"
-	} else if len(password) >= 8 && (hasLower || hasUpper) && hasDigit {
+	} else if len(password) >= 8 && (hasLower || hasUpper) && hasDigit && !hasRepeated {
 		strength = "Moderate"
 	}
 
-	return strength
+	return strength, repeatedChar, repeatedCharCount
 }
