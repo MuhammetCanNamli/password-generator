@@ -21,7 +21,10 @@ func main() {
 			return
 		}
 
-		fmt.Println("Generated Password 1:", password)
+		fmt.Println("Generated Password: ", password)
+
+		strength := checkPasswordStrength(password)
+		fmt.Println("Password Strength: ", strength)
 
 		for {
 			fmt.Print("Do you want to create another password? (Y / N): ")
@@ -96,4 +99,35 @@ func parseInt(s string) (int, error) {
 		return 0, fmt.Errorf("An invalid number entry: %s", s)
 	}
 	return num, nil
+}
+
+func checkPasswordStrength(password string) string {
+	var (
+		hasLower   bool
+		hasUpper   bool
+		hasDigit   bool
+		hasSpecial bool
+	)
+
+	for _, char := range password {
+		switch {
+		case 'a' <= char && char <= 'z':
+			hasLower = true
+		case 'A' <= char && char <= 'Z':
+			hasUpper = true
+		case '0' <= char && char <= '9':
+			hasDigit = true
+		default:
+			hasSpecial = true
+		}
+	}
+
+	strength := "Weak"
+	if len(password) >= 12 && hasLower && hasUpper && hasDigit && hasSpecial {
+		strength = "Strong"
+	} else if len(password) >= 8 && (hasLower || hasUpper) && hasDigit {
+		strength = "Moderate"
+	}
+
+	return strength
 }
